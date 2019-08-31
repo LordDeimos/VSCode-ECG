@@ -41,10 +41,11 @@ let getMetrics = (e:object)=>{
 		samples.shift();
 	}
 	samples.push(delta);
-	let average = (temp+samples.reduce((prev,curr)=>{
+	let average = samples.reduce((prev,curr)=>{
 		return prev+curr;
-	}))/samples.length;
-	emitter.emit('ecg-change',average/(interval/1000));
+	})/samples.length;
+	let min = Math.max(average+temp,0.1);
+	emitter.emit('ecg-change',(min)/(interval/1000));
 	delta = 0;
 }
 
