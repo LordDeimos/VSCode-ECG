@@ -20,12 +20,12 @@ emitter.on('ecg-change',(charpsec)=>{
 	});
 });
 
-let getMetrics = ()=>{
+let getMetrics = (e:object)=>{
 	let editor = vscode.window.activeTextEditor;
 	if(!editor) return;
 	let currentDoc = editor.document;
 	let diags = vscode.languages.getDiagnostics();
-	let temp  =currentDoc.getText().length;
+	let temp = 0;
 	for(let diag of diags){
 		for(let message of diag){
 			if(message instanceof Array){
@@ -37,16 +37,15 @@ let getMetrics = ()=>{
 			}
 		}
 	}
-	delta = temp - count;
-	count = temp;
 	if(samples.length==maxsamples){
 		samples.shift();
 	}
 	samples.push(delta);
-	let average = samples.reduce((prev,curr,i,samples)=>{
+	let average = (temp+samples.reduce((prev,curr)=>{
 		return prev+curr;
-	})/samples.length;
+	}))/samples.length;
 	emitter.emit('ecg-change',average/(interval/1000));
+	delta = 0;
 }
 
 export function activate(context: vscode.ExtensionContext) {
@@ -58,7 +57,9 @@ export function activate(context: vscode.ExtensionContext) {
 			type: "interval",
 			data: interval
 		});
-
+		vscode.workspace.onDidChangeTextDocument((args)=>{
+			++delta;
+		});
 		setInterval(getMetrics,interval);
 
 	});
