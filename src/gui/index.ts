@@ -1,31 +1,25 @@
-import { window, StatusBarAlignment, ViewColumn, Uri, ExtensionContext } from "vscode";
+import { window, StatusBarAlignment, ViewColumn, Uri, ExtensionContext, WebviewPanel } from "vscode";
 import * as fs from "fs";
 import * as path from "path";
 
 const statusBarItem = window.createStatusBarItem(StatusBarAlignment.Left);
 
-let webView = window.createWebviewPanel("ecgGraph", "ECG Graph", ViewColumn.Beside, {
-	enableScripts: true
-});
-let value = 10;
+export let webView: WebviewPanel;
 
 export function setup(context: ExtensionContext) {
+	webView = window.createWebviewPanel("ecgGraph", "ECG Graph", ViewColumn.Beside, {
+	    enableScripts: true
+	});
 	statusBarItem.show();
 	webView.reveal();
 
 	const viewPath = Uri.file(path.join(context.extensionPath, "src", "gui", "view.html"));
 	webView.webview.html = fs.readFileSync(viewPath.fsPath, "utf8");
-
-	setInterval(update, 100);
 }
 
-export function set(val: number) {
-	value = val;
-}
-
-function update() {
+export function update(val: number) {
 	webView.webview.postMessage({
 		type: "update",
-		data: value
+		data: val
 	});
 }

@@ -1,9 +1,9 @@
 {
-	"name": "base-sample",
-	"displayName": "base-sample",
-	"description": "Base sample for other samples at Microsoft/vscode-extension-samples",
+	"name": "code-ecg",
+	"displayName": "code-ecg",
+	"description": "Code monitor like a ECG",
 	"version": "0.0.1",
-	"publisher": "vscode-samples",
+	"publisher": "team undecided",
 	"engines": {
 		"vscode": "^1.32.0"
 	},
@@ -11,14 +11,26 @@
 		"Other"
 	],
 	"activationEvents": [
-		"onCommand:extension.helloWorld"
+		"onCommand:extension.openmonitor"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
 		"commands": [
 			{
-				"command": "extension.helloWorld",
-				"title": "Hello World"
+				"command": "extension.openmonitor",
+				"title": "Open ECG Monitor"
+			}
+		],
+		"configuration":[
+			{
+				"title": "Code-ECG",
+				"properties": {
+					"code-ecg.updateInterval":{
+						"type":"integer",
+						"default":500,
+						"description": "Sets the update interval for the graph in milliseconds."
+					}
+				}
 			}
 		]
 	},

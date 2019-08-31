@@ -6,47 +6,64 @@ import * as gui from "./gui/index";
 
 let emitter = new EventEmitter();
 
-let delta:number = 0;
-let count:number = 0;
+let delta = 0;
+let count = 0;
+let samples:Array<number> = [];
+
+const interval = vscode.workspace.getConfiguration("Code-ECG").get("code-ecg.updateInterval");
+const maxsamples = 20;
 
 setInterval(()=>{
 	let editor = vscode.window.activeTextEditor;
 	if(!editor) return;
 	let currentDoc = editor.document;
 	let diags = vscode.languages.getDiagnostics();
-	let temp:number  =currentDoc.getText().length;
-	for(let i:number = 0;i<diags.length;++i){
-		for(let j:number = 0;j<diags[i][1].length;++j){
-			if(vscode.DiagnosticSeverity[diags[i][1][j].severity]==="Error"){
-				temp -= diags[i][1][j].range.end.character-diags[i][1][j].range.start.character;
+	let temp  =currentDoc.getText().length;
+	for(let diag of diags){
+		for(let message of diag){
+			if(message instanceof Array){
+				for(let problem of message){
+					if(vscode.DiagnosticSeverity[problem.severity]==="Error"){
+						temp -= problem.range.end.character-problem.range.start.character;
+					}
+				}
 			}
 		}
 	}
 	delta = temp - count;
 	count = temp;
-	emitter.emit('ecg-change',delta);
-},500);
+	if(samples.length==maxsamples){
+		samples.shift();
+	}
+	samples.push(delta);
+	let average = samples.reduce((prev,curr,i,samples)=>{
+		return prev+curr;
+	})/samples.length;
+	emitter.emit('ecg-change',average/(((!interval)?500:interval as number)/1000));
+},(!interval)?500:interval as number);
 
-// this method is called when your extension is activated
-// your extension is activated the very first time the command is executed
+emitter.on('ecg-change',(charpsec)=>{
+	gui.webView.webview.postMessage({
+		type: "update",
+		data: charpsec
+	});
+});
+
+
 export function activate(context: vscode.ExtensionContext) {
-	// Use the console to output diagnostic information (console.log) and errors (console.error)
-	// This line of code will only be executed once when your extension is activated
-	console.log('Congratulations, your extension "helloworld-sample" is now active!');
+	console.log('Welcome to Code-ECG, get typing...');
 
-	// The command has been defined in the package.json file
-	// Now provide the implementation of the command with registerCommand
-	// The commandId parameter must match the command field in package.json
-	let disposable = vscode.commands.registerCommand('extension.helloWorld', () => {
-		// The code you place here will be executed every time your command is executed
+	let openmonitor = vscode.commands.registerCommand('extension.openmonitor', () => {
 
-		// Display a message box to the user
-		vscode.window.showInformationMessage('Hello World!');
+		gui.setup(context);
+		gui.webView.webview.postMessage({
+			type: "interval",
+			data: interval
+		});
+
 	});
 
-	context.subscriptions.push(disposable);
-
-	gui.setup(context);
+	context.subscriptions.push(openmonitor);
 }
 
 // this method is called when your extension is deactivated
