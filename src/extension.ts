@@ -11,7 +11,7 @@ let count = 0;
 let samples:Array<number> = [];
 let hasBeenAboveThreshold = false;
 
-const DISPLAY_NOTIFICATION_THRESHOLD = 1000;
+const DISPLAY_NOTIFICATION_THRESHOLD = 0.004;
 
 const interval:number = vscode.workspace.getConfiguration("code-ecg").get("updateInterval") || 500;
 const maxsamples = Math.round(0.5*interval);
@@ -93,11 +93,15 @@ export function activate(context: vscode.ExtensionContext) {
 			})/samples.length;
 			// currentValue = (currentValue * 50 + delta) / 51;
 
-			console.log(average / interval, DISPLAY_NOTIFICATION_THRESHOLD);
-
 			if (average / interval > DISPLAY_NOTIFICATION_THRESHOLD) hasBeenAboveThreshold = true;
 
-			if (average / interval < DISPLAY_NOTIFICATION_THRESHOLD && hasBeenAboveThreshold) vscode.window.showErrorMessage("YOUR BAD QUIT YOUR JOB DUDE");
+			console.log(average / interval, DISPLAY_NOTIFICATION_THRESHOLD, hasBeenAboveThreshold);
+
+			if (average / interval < DISPLAY_NOTIFICATION_THRESHOLD && hasBeenAboveThreshold) {
+				vscode.window.showErrorMessage("YOUR BAD QUIT YOUR JOB DUDE");
+				hasBeenAboveThreshold = false;
+			}
+
 
 			emitter.emit('ecg-change',average/(interval/1000));
 		},interval);
