@@ -1,5 +1,7 @@
-# Base Sample
+# VSCode ECG
 
-This sample is similar to the [helloworld-sample](../helloworld-sample), but it follows the [Sample Guideline](https://github.com/Microsoft/vscode-extension-samples/blob/master/.github/SAMPLE_GUIDELINE.md).
+This extension is designed to give productivity feedback to the programmer based on their character input per minute/second and their error rate.
 
-You can easily write a new sample following the guideline by `cp -r .base-sample my-sample`.
+This would display this in the form of a graph similar to an ECG machine does.
+
+We are building this for the CodeNetwork Winter Hackathon 2019
