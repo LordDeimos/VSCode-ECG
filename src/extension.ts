@@ -31,13 +31,6 @@ setInterval(()=>{
 			}
 		}
 	}
-	// for(let i = 0;i<diags.length;++i){
-	// 	for(let j = 0;j<diags[0][1].length;++j){
-	// 		if(vscode.DiagnosticSeverity[diags[0][1][j].severity]==="Error"){
-	// 			temp -= diags[0][1][j].range.end.character-diags[0][1][j].range.start.character;
-	// 		}
-	// 	}
-	// }
 	delta = temp - count;
 	count = temp;
 	if(samples.length==maxsamples){
