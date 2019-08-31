@@ -89,6 +89,8 @@
 				const prediction = lastRealValue.value - (secondLastRealValue - lastRealValue.value) * timeDiff;
 			
 				scale = Math.max(...values, Number.isNaN(prediction) ? 0 : prediction) / $graph.height;
+				if (scale < .01) scale = .01;
+				console.log(scale);
 			
 				graphCtx.clearRect(0, 0, $graph.width, $graph.height);
 				speedoCtx.clearRect(0, 0, $speedo.width, $speedo.height);
