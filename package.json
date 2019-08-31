@@ -11,7 +11,7 @@
 		"Other"
 	],
 	"activationEvents": [
-		"*"
+		"onCommand:extension.openmonitor"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
@@ -19,6 +19,18 @@
 			{
 				"command": "extension.openmonitor",
 				"title": "Open ECG Monitor"
+			}
+		],
+		"configuration":[
+			{
+				"title": "Code-ECG",
+				"properties": {
+					"code-ecg.updateInterval":{
+						"type":"integer",
+						"default":500,
+						"description": "Sets the update interval for the graph in milliseconds."
+					}
+				}
 			}
 		]
 	},

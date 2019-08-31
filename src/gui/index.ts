@@ -4,8 +4,7 @@ import * as path from "path";
 
 const statusBarItem = window.createStatusBarItem(StatusBarAlignment.Left);
 
-let webView: WebviewPanel;
-let value = 0;
+export let webView: WebviewPanel;
 
 export function setup(context: ExtensionContext) {
 	webView = window.createWebviewPanel("ecgGraph", "ECG Graph", ViewColumn.Beside, {
@@ -16,17 +15,11 @@ export function setup(context: ExtensionContext) {
 
 	const viewPath = Uri.file(path.join(context.extensionPath, "src", "gui", "view.html"));
 	webView.webview.html = fs.readFileSync(viewPath.fsPath, "utf8");
-
-	setInterval(update, 100);
 }
 
-export function set(val: number) {
-	value = val;
-}
-
-function update() {
+export function update(val: number) {
 	webView.webview.postMessage({
 		type: "update",
-		data: value
+		data: val
 	});
 }
