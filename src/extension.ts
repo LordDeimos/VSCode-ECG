@@ -10,7 +10,7 @@ let delta = 0;
 let count = 0;
 let samples:Array<number> = [];
 
-const interval = 500;
+const interval = vscode.workspace.getConfiguration("Code-ECG").get("code-ecg.updateInterval");
 const maxsamples = 20;
 
 setInterval(()=>{
@@ -19,7 +19,6 @@ setInterval(()=>{
 	let currentDoc = editor.document;
 	let diags = vscode.languages.getDiagnostics();
 	let temp  =currentDoc.getText().length;
-	//Need to determine what happens when there are multiple errors/warnings
 	for(let diag of diags){
 		for(let message of diag){
 			if(message instanceof Array){
@@ -40,11 +39,14 @@ setInterval(()=>{
 	let average = samples.reduce((prev,curr,i,samples)=>{
 		return prev+curr;
 	})/samples.length;
-	emitter.emit('ecg-change',average/(interval/1000));
-},interval);
+	emitter.emit('ecg-change',average/(((!interval)?500:interval as number)/1000));
+},(!interval)?500:interval as number);
 
 emitter.on('ecg-change',(charpsec)=>{
-	console.log(Math.abs(charpsec));
+	gui.webView.webview.postMessage({
+		type: "update",
+		data: charpsec
+	});
 });
 
 
@@ -52,11 +54,12 @@ export function activate(context: vscode.ExtensionContext) {
 	console.log('Welcome to Code-ECG, get typing...');
 
 	let openmonitor = vscode.commands.registerCommand('extension.openmonitor', () => {
-		vscode.window.showInformationMessage('Hello World!');
 
 		gui.setup(context);
-		// let webView = vscode.window.createWebviewPanel("ecgGraph", "ECG Graph", vscode.ViewColumn.Beside, {});
-		// webView.reveal();
+		gui.webView.webview.postMessage({
+			type: "interval",
+			data: interval
+		});
 
 	});
 

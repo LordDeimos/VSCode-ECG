@@ -16,6 +16,7 @@
 				$speedo = document.getElementById("speedo");
 			const graphCtx = $graph.getContext("2d"),
 				speedoCtx = $speedo.getContext("2d");
+			let interval = 500;
 			
 			window.onmessage = function(message) {
 				console.log("Got update");
@@ -23,6 +24,9 @@
 				switch (type) {
 					case "update":
 						update(data);
+						break;
+					case "interval":
+						interval=data;
 						break;
 				}
 			}
@@ -55,8 +59,6 @@
 			let currentIndex = 0;
 			
 			const spacing = 7;
-			
-			const interval = 500;
 			
 			let scale = 1;
 			let updateTime = 0;
