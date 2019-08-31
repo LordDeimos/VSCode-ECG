@@ -1,1 +1,46 @@
-<h1>Hello, world</h1>
+<canvas id="graph"></canvas>
+<canvas id="speedo"></canvas>
+
+<script>
+window.onmessage = function(message) {
+	console.log("Got update");
+	const {type, data} = message.data;
+	switch (type) {
+		case "update":
+			update(data);
+			break;
+	}
+}
+
+const values = [];
+
+function update(value) {
+	values.push(value);
+	if (values.length > 200) values.shift();
+}
+
+function frame() {
+	requestAnimationFrame(frame);
+
+	drawGraph();
+	drawSpeedo();
+}
+
+function drawGraph() {
+	for (let i = 0; i < values.length; i++) {
+		const current = values[i],
+			previous = values[i - 1] || current;
+
+		ctx.
+	}
+}
+
+function drawSpeedo() {
+
+}
+
+window.postMessage({
+	type: "update",
+	data: 10
+});
+</script>
