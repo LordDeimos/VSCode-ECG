@@ -1,9 +1,26 @@
-import { window, StatusBarAlignment } from "vscode";
+import { window, StatusBarAlignment, ViewColumn, Uri, ExtensionContext } from "vscode";
+import * as fs from "fs";
+import * as path from "path";
 
 const statusBarItem = window.createStatusBarItem(StatusBarAlignment.Left);
 
-export function guiTest() {
-	console.log("Running test?");
-	statusBarItem.text = "Hai";
+let webView = window.createWebviewPanel("ecgGraph", "ECG Graph", ViewColumn.Beside, {});
+let value = 0;
+
+export function setup(context: ExtensionContext) {
 	statusBarItem.show();
+	webView.reveal();
+
+	const viewPath = Uri.file(path.join(context.extensionPath, "src", "gui", "view.html"));
+	webView.webview.html = fs.readFileSync(viewPath.fsPath, "utf8");
+
+	setInterval(update, 100);
+}
+
+export function set(val: number) {
+	value = val;
+}
+
+function update() {
+
 }
