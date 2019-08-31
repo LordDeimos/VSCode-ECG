@@ -4,7 +4,9 @@ import * as path from "path";
 
 const statusBarItem = window.createStatusBarItem(StatusBarAlignment.Left);
 
-let webView = window.createWebviewPanel("ecgGraph", "ECG Graph", ViewColumn.Beside, {});
+let webView = window.createWebviewPanel("ecgGraph", "ECG Graph", ViewColumn.Beside, {
+	enableScripts: true
+});
 let value = 10;
 
 export function setup(context: ExtensionContext) {
