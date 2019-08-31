@@ -5,10 +5,10 @@
 		<title>yea nah</title>
 	</head>
 	<body>
-		<div style="background:black;position:fixed;top:0;left:0;right:0;bottom:0;padding:1em">
+		<div style="background:#1e1e1e;position:fixed;top:0;left:0;right:0;bottom:0;padding:1em">
 				<h1 style="margin:0;font-family:'Comic Sans MS';" id="vsecg-text">VSECG</h1>
 				<canvas id="graph" width=300 height=150></canvas>
-				<canvas id="speedo" style="background:black no-repeat center center;background-size:cover;background-image:url(https://alduino.dev/speedo.png)" width=150 height=150></canvas>
+				<canvas id="speedo" style="background:transparent no-repeat center center;background-size:cover;background-image:url(https://alduino.dev/speedo.png)" width=150 height=150></canvas>
 			</div>
 			
 			<script>
@@ -17,6 +17,13 @@
 			const graphCtx = $graph.getContext("2d"),
 				speedoCtx = $speedo.getContext("2d");
 			let interval = 500;
+
+			let themeValues = {
+				light: "#9cdcfe",
+				dark: "#5689d688",
+				background: "#1e1e1e",
+				foreground: "#d4d4d433"
+			};
 			
 			window.onmessage = function(message) {
 				console.log("Got update");
@@ -28,6 +35,8 @@
 					case "interval":
 						interval=data;
 						break;
+					case "theme":
+						themeValues = data;
 				}
 			}
 			
@@ -89,9 +98,21 @@
 			}
 			
 			function drawGraph(prediction) {			
-				graphCtx.lineWidth = 3;
-				graphCtx.strokeStyle = "#0f7";
+				graphCtx.lineWidth = 1;
+				graphCtx.strokeStyle = themeValues.foreground;
 				graphCtx.lineCap = "round";
+
+				if (scale !== 0) {
+					for (let i = 0; i < $graph.height; i += 1 * Math.floor(scale * 30) / scale) {
+						graphCtx.beginPath();
+						graphCtx.moveTo(0, $graph.height - i);
+						graphCtx.lineTo($graph.width - spacing * 2, $graph.height - i);
+						graphCtx.stroke();
+					}
+				}
+
+				graphCtx.lineWidth = 3;
+				graphCtx.strokeStyle = themeValues.light;
 			
 				const points = values.map((line, i) => ({
 					x: (i - 1) * spacing,
@@ -105,9 +126,12 @@
 					x: (lastRealValue.index + timeDiff) * spacing,
 					y: $graph.height - prediction / scale
 				};
+
+				graphCtx.fillStyle = themeValues.dark;
 			
 				if (currentIndex > 2) {
 					graphCtx.beginPath();
+					graphCtx.moveTo(-10, $graph.height);
 					for (let i = 0; i < currentIndex - 1; i++) {
 						const cx = (points[i].x + points[i + 1].x) / 2;
 						const cy = (points[i].y + points[i + 1].y) / 2;
@@ -115,10 +139,13 @@
 					}
 					graphCtx.quadraticCurveTo(points[currentIndex - 1].x, points[currentIndex - 1].y, points[currentIndex].x, points[currentIndex].y);
 					graphCtx.stroke();
+					graphCtx.lineTo(points[currentIndex].x, $graph.height);
+					graphCtx.fill();
 				}
 			
 				if (points.length - currentIndex > 2) {
 					graphCtx.beginPath();
+					graphCtx.moveTo(points[currentIndex + 1].x, $graph.height);
 					for (let i = currentIndex + 1; i < points.length - 2; i++) {
 						const cx = (points[i].x + points[i + 1].x) / 2;
 						const cy = (points[i].y + points[i + 1].y) / 2;
@@ -136,6 +163,8 @@
 						points[points.length - 1].y
 					);
 					graphCtx.stroke();
+					graphCtx.lineTo(points[points.length - 1].x, $graph.height);
+					graphCtx.fill();
 				}
 			}
 
@@ -168,8 +197,8 @@
 				return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
 			}
 			
-			/*let val = 0;
-			setInterval(() => {
+			let val = 0;
+			/*setInterval(() => {
 				val = (7 * val + Math.max(0, randomBm() * 30)) / 8;
 				window.postMessage({
 					type: "update",
