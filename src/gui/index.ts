@@ -8,7 +8,9 @@ let webView: WebviewPanel;
 let value = 0;
 
 export function setup(context: ExtensionContext) {
-	webView = window.createWebviewPanel("ecgGraph", "ECG Graph", ViewColumn.Beside, {});
+	webView = window.createWebviewPanel("ecgGraph", "ECG Graph", ViewColumn.Beside, {
+	    enableScripts: true
+	});
 	statusBarItem.show();
 	webView.reveal();
 
@@ -23,5 +25,8 @@ export function set(val: number) {
 }
 
 function update() {
-
+	webView.webview.postMessage({
+		type: "update",
+		data: value
+	});
 }
