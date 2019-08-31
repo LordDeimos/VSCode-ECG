@@ -150,7 +150,7 @@
 				speedoCtx.lineWidth = 7;
 				speedoCtx.lineCap = "round";
 				speedoCtx.strokeStyle = "white";
-				const angle = sigmoid(currentValue / 10) * max;
+				const angle = (2 + sigmoid(currentValue / 10)) * max;
 				speedoCtx.beginPath();
 				speedoCtx.moveTo($speedo.width / 2, $speedo.height / 2);
 				speedoCtx.lineTo($speedo.width / 2 - Math.cos(angle) * length * .7, $speedo.height / 2 - Math.sin(angle) * length * .7);
@@ -166,14 +166,14 @@
 				return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
 			}
 			
-			let val = 0;
+			/*let val = 0;
 			setInterval(() => {
 				val = (7 * val + Math.max(0, randomBm() * 30)) / 8;
 				window.postMessage({
 					type: "update",
 					data: val
 				});
-			}, interval);
+			}, interval);*/
 		</script>
 	</body>
 </html>
