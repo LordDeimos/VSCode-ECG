@@ -20,17 +20,17 @@ setInterval(()=>{
 	let diags = vscode.languages.getDiagnostics();
 	let temp  =currentDoc.getText().length;
 	//Need to determine what happens when there are multiple errors/warnings
-	diags.forEach((diag)=>{
-		diag.forEach((message)=>{
+	for(let diag of diags){
+		for(let message of diag){
 			if(message instanceof Array){
-				message.forEach((problem)=>{
+				for(let problem of message){
 					if(vscode.DiagnosticSeverity[problem.severity]==="Error"){
 						temp -= problem.range.end.character-problem.range.start.character;
 					}
-				});
+				}
 			}
-		});
-	});
+		}
+	}
 	// for(let i = 0;i<diags.length;++i){
 	// 	for(let j = 0;j<diags[0][1].length;++j){
 	// 		if(vscode.DiagnosticSeverity[diags[0][1][j].severity]==="Error"){
