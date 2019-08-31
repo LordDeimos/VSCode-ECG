@@ -23,11 +23,36 @@ emitter.on('ecg-change',(charpsec)=>{
 	});
 });
 
-let currentValue = 0;
+let getMetrics = (e:object)=>{
+	let editor = vscode.window.activeTextEditor;
+	if(!editor) return;
+	let currentDoc = editor.document;
+	let diags = vscode.languages.getDiagnostics();
+	let temp = 0;
+	for(let diag of diags){
+		for(let message of diag){
+			if(message instanceof Array){
+				for(let problem of message){
+					if(vscode.DiagnosticSeverity[problem.severity]==="Error"){
+						temp -= problem.range.end.character-problem.range.start.character;
+					}
+				}
+			}
+		}
+	}
+	if(samples.length==maxsamples){
+		samples.shift();
+	}
+	samples.push(delta);
+	let average = (temp+samples.reduce((prev,curr)=>{
+		return prev+curr;
+	}))/samples.length;
+	emitter.emit('ecg-change',average/(interval/1000));
+	delta = 0;
+}
 
 export function activate(context: vscode.ExtensionContext) {
 	console.log('Welcome to Code-ECG, get typing...');
-
 	let openmonitor = vscode.commands.registerCommand('extension.openmonitor', () => {
 
 		gui.setup(context);
@@ -35,6 +60,10 @@ export function activate(context: vscode.ExtensionContext) {
 			type: "interval",
 			data: interval
 		});
+		vscode.workspace.onDidChangeTextDocument((args)=>{
+			++delta;
+		});
+		setInterval(getMetrics,interval);
 
 		setInterval(()=>{
 			let editor = vscode.window.activeTextEditor;
