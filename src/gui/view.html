@@ -7,8 +7,8 @@
 	<body>
 		<div style="background:black;position:fixed;top:0;left:0;right:0;bottom:0;padding:1em">
 				<h1 style="margin:0;font-family:'Comic Sans MS';" id="vsecg-text">VSECG</h1>
-				<canvas id="graph"></canvas>
-				<canvas id="speedo" style="background:purple"></canvas>
+				<canvas id="graph" width=300 height=150></canvas>
+				<canvas id="speedo" style="background:black no-repeat center center;background-size:cover;background-image:url(https://alduino.dev/speedo.png)" width=150 height=150></canvas>
 			</div>
 			
 			<script>
@@ -16,6 +16,7 @@
 				$speedo = document.getElementById("speedo");
 			const graphCtx = $graph.getContext("2d"),
 				speedoCtx = $speedo.getContext("2d");
+			let interval = 500;
 			
 			window.onmessage = function(message) {
 				console.log("Got update");
@@ -23,6 +24,9 @@
 				switch (type) {
 					case "update":
 						update(data);
+						break;
+					case "interval":
+						interval=data;
 						break;
 				}
 			}
@@ -56,8 +60,6 @@
 			
 			const spacing = 7;
 			
-			const interval = 500;
-			
 			let scale = 1;
 			let updateTime = 0;
 			
@@ -79,13 +81,14 @@
 			
 				scale = Math.max(...values, Number.isNaN(prediction) ? 0 : prediction) / $graph.height;
 			
+				graphCtx.clearRect(0, 0, $graph.width, $graph.height);
+				speedoCtx.clearRect(0, 0, $speedo.width, $speedo.height);
+
 				drawGraph(prediction);
-				drawSpeedo();
+				drawSpeedo(prediction || values[values.length - 1]);
 			}
 			
-			function drawGraph(prediction) {
-				graphCtx.clearRect(0, 0, $graph.width, $graph.height);
-			
+			function drawGraph(prediction) {			
 				graphCtx.lineWidth = 3;
 				graphCtx.strokeStyle = "#0f7";
 				graphCtx.lineCap = "round";
@@ -135,9 +138,25 @@
 					graphCtx.stroke();
 				}
 			}
+
+			function sigmoid(x) {
+				return 1 / (1 + Math.exp(-x));
+			}
 			
-			function drawSpeedo() {
-			
+			function drawSpeedo(prediction) {
+				const length = Math.min($speedo.width / 2, $speedo.height);
+
+				const max = 180 * Math.PI / 180;
+
+				const currentValue = prediction;
+				speedoCtx.lineWidth = 7;
+				speedoCtx.lineCap = "round";
+				speedoCtx.strokeStyle = "white";
+				const angle = (2 + sigmoid(currentValue / 10)) * max;
+				speedoCtx.beginPath();
+				speedoCtx.moveTo($speedo.width / 2, $speedo.height / 2);
+				speedoCtx.lineTo($speedo.width / 2 - Math.cos(angle) * length * .7, $speedo.height / 2 - Math.sin(angle) * length * .7);
+				speedoCtx.stroke();
 			}
 			
 			frame();
@@ -149,14 +168,14 @@
 				return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
 			}
 			
-			let val = 0;
+			/*let val = 0;
 			setInterval(() => {
-				val = (7 * val + Math.max(0, randomBm())) / 8;
+				val = (7 * val + Math.max(0, randomBm() * 30)) / 8;
 				window.postMessage({
 					type: "update",
 					data: val
 				});
-			}, interval);
+			}, interval);*/
 		</script>
 	</body>
 </html>

@@ -10,53 +10,58 @@ let delta = 0;
 let count = 0;
 let samples:Array<number> = [];
 
-const interval = 500;
-const maxsamples = 20;
-
-setInterval(()=>{
-	let editor = vscode.window.activeTextEditor;
-	if(!editor) return;
-	let currentDoc = editor.document;
-	let diags = vscode.languages.getDiagnostics();
-	let temp  =currentDoc.getText().length;
-	//Need to determine what happens when there are multiple errors/warnings
-	for(let diag of diags){
-		for(let message of diag){
-			if(message instanceof Array){
-				for(let problem of message){
-					if(vscode.DiagnosticSeverity[problem.severity]==="Error"){
-						temp -= problem.range.end.character-problem.range.start.character;
-					}
-				}
-			}
-		}
-	}
-	delta = temp - count;
-	count = temp;
-	if(samples.length==maxsamples){
-		samples.shift();
-	}
-	samples.push(delta);
-	let average = samples.reduce((prev,curr,i,samples)=>{
-		return prev+curr;
-	})/samples.length;
-	emitter.emit('ecg-change',average/(interval/1000));
-},interval);
+const interval:number = vscode.workspace.getConfiguration("code-ecg").get("updateInterval") || 500;
+const maxsamples = Math.round(0.5*interval);
 
 emitter.on('ecg-change',(charpsec)=>{
-	console.log(Math.abs(charpsec));
+	gui.webView.webview.postMessage({
+		type: "update",
+		data: charpsec
+	});
 });
 
+let currentValue = 0;
 
 export function activate(context: vscode.ExtensionContext) {
 	console.log('Welcome to Code-ECG, get typing...');
 
 	let openmonitor = vscode.commands.registerCommand('extension.openmonitor', () => {
-		vscode.window.showInformationMessage('Hello World!');
 
 		gui.setup(context);
-		// let webView = vscode.window.createWebviewPanel("ecgGraph", "ECG Graph", vscode.ViewColumn.Beside, {});
-		// webView.reveal();
+		gui.webView.webview.postMessage({
+			type: "interval",
+			data: interval
+		});
+
+		setInterval(()=>{
+			let editor = vscode.window.activeTextEditor;
+			if(!editor) return;
+			let currentDoc = editor.document;
+			let diags = vscode.languages.getDiagnostics();
+			let temp  =currentDoc.getText().length;
+			for(let diag of diags){
+				for(let message of diag){
+					if(message instanceof Array){
+						for(let problem of message){
+							if(vscode.DiagnosticSeverity[problem.severity]==="Error"){
+								temp -= problem.range.end.character-problem.range.start.character;
+							}
+						}
+					}
+				}
+			}
+			delta = temp - count;
+			count = temp;
+			if(samples.length==maxsamples){
+				samples.shift();
+			}
+			samples.push(delta);
+			let average = samples.reduce((prev,curr,i,samples)=>{
+				return prev+curr;
+			})/samples.length;
+			// currentValue = (currentValue * 50 + delta) / 51;
+			emitter.emit('ecg-change',average/(interval/1000));
+		},interval);
 
 	});
 
