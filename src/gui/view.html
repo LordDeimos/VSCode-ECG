@@ -6,7 +6,7 @@
 	</head>
 	<body>
 		<div style="background:#1e1e1e;position:fixed;top:0;left:0;right:0;bottom:0;padding:1em">
-				<h1 style="margin:0;font-family:'Comic Sans MS';" id="vsecg-text">VSECG</h1>
+				<h1 style="margin:0;font-family:'Comic Sans MS';"><span id="vsecg-text">VSECG</span> is the best extension eva</h1>
 				<canvas id="graph" width=300 height=150></canvas>
 				<canvas id="speedo" style="background:transparent no-repeat center center;background-size:cover;background-image:url(https://alduino.dev/speedo.png)" width=150 height=150></canvas>
 			</div>
@@ -102,9 +102,8 @@
 				graphCtx.strokeStyle = themeValues.foreground;
 				graphCtx.lineCap = "round";
 
-				if (scale !== 0) {
-					//console.log(1 * Math.floor(scale * 30) / scale);
-					for (let i = 0; i < $graph.height; i += 1 * Math.floor(scale * 30) / scale) {
+				if (Math.floor(scale * 100) !== 0) {
+					for (let i = 0; i < $graph.height; i += Math.floor(scale * 100) / scale / 10) {
 						graphCtx.beginPath();
 						graphCtx.moveTo(0, $graph.height - i);
 						graphCtx.lineTo($graph.width - spacing * 2, $graph.height - i);
@@ -198,14 +197,14 @@
 				return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
 			}
 			
-			// let val = 0;
-			// setInterval(() => {
-			// 	val = (7 * val + Math.max(0, randomBm() * 30)) / 8;
-			// 	window.postMessage({
-			// 		type: "update",
-			// 		data: val
-			// 	});
-			// }, interval);
+			let val = 0;
+			setInterval(() => {
+				val = (7 * val + Math.max(0, randomBm() * 30)) / 8;
+				window.postMessage({
+					type: "update",
+					data: val
+				});
+			}, interval);
 		</script>
 	</body>
 </html>
