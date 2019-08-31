@@ -2,6 +2,7 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 import * as EventEmitter from 'events';
+import * as gui from "./gui/index";
 
 let emitter = new EventEmitter();
 
@@ -44,6 +45,8 @@ export function activate(context: vscode.ExtensionContext) {
 	});
 
 	context.subscriptions.push(disposable);
+
+	gui.setup(context);
 }
 
 // this method is called when your extension is deactivated
