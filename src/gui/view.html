@@ -1,1 +1,162 @@
-<h1>Hello, world</h1>
+<!doctype html>
+<html>
+	<!-- stupid vscode forcing me to make this a propert html document -->
+	<head>
+		<title>yea nah</title>
+	</head>
+	<body>
+		<div style="background:black;position:fixed;top:0;left:0;right:0;bottom:0;padding:1em">
+				<h1 style="margin:0;font-family:'Comic Sans MS';" id="vsecg-text">VSECG</h1>
+				<canvas id="graph"></canvas>
+				<canvas id="speedo" style="background:purple"></canvas>
+			</div>
+			
+			<script>
+			const $graph = document.getElementById("graph"),
+				$speedo = document.getElementById("speedo");
+			const graphCtx = $graph.getContext("2d"),
+				speedoCtx = $speedo.getContext("2d");
+			
+			window.onmessage = function(message) {
+				console.log("Got update");
+				const {type, data} = message.data;
+				switch (type) {
+					case "update":
+						update(data);
+						break;
+				}
+			}
+			
+			const colours = [
+				"#333",
+				"#777",
+				"#aaa",
+				"#777",
+				"#333"
+			];
+			
+			let textIndex = 0;
+			setInterval(() => {
+				const $text = document.getElementById("vsecg-text");
+				const content = $text.textContent;
+				$text.textContent = "";
+				for (let i = 0; i < content.length; i++) {
+					const letter = content[i];
+					const $el = document.createElement("span");
+					$el.textContent = letter;
+					$el.style.color = colours[(textIndex - i) % colours.length];
+					$text.appendChild($el);
+				}
+				textIndex++;
+			}, 100);
+			
+			const values = [];
+			
+			let currentIndex = 0;
+			
+			const spacing = 7;
+			
+			const interval = 500;
+			
+			let scale = 1;
+			let updateTime = 0;
+			
+			function update(value) {
+				values[currentIndex] = value;
+				currentIndex++;
+				updateTime = performance.now();
+				if (currentIndex > $graph.width / spacing) currentIndex = 0;
+			}
+			
+			function frame() {
+				requestAnimationFrame(frame);
+			
+				const secondLastRealValue = values[currentIndex - 2];
+				const lastRealValue = {index: currentIndex - 1, value: values[currentIndex - 1]};
+				const timeDiff = (performance.now() - updateTime) / interval;
+			
+				const prediction = lastRealValue.value - (secondLastRealValue - lastRealValue.value) * timeDiff;
+			
+				scale = Math.max(...values, Number.isNaN(prediction) ? 0 : prediction) / $graph.height;
+			
+				drawGraph(prediction);
+				drawSpeedo();
+			}
+			
+			function drawGraph(prediction) {
+				graphCtx.clearRect(0, 0, $graph.width, $graph.height);
+			
+				graphCtx.lineWidth = 3;
+				graphCtx.strokeStyle = "#0f7";
+				graphCtx.lineCap = "round";
+			
+				const points = values.map((line, i) => ({
+					x: (i - 1) * spacing,
+					y: $graph.height - line / scale
+				}));
+			
+				const lastRealValue = {index: currentIndex - 1, value: values[currentIndex - 1]};
+				const timeDiff = (performance.now() - updateTime) / interval;
+			
+				points[currentIndex] = {
+					x: (lastRealValue.index + timeDiff) * spacing,
+					y: $graph.height - prediction / scale
+				};
+			
+				if (currentIndex > 2) {
+					graphCtx.beginPath();
+					for (let i = 0; i < currentIndex - 1; i++) {
+						const cx = (points[i].x + points[i + 1].x) / 2;
+						const cy = (points[i].y + points[i + 1].y) / 2;
+						graphCtx.quadraticCurveTo(points[i].x, points[i].y, cx, cy);
+					}
+					graphCtx.quadraticCurveTo(points[currentIndex - 1].x, points[currentIndex - 1].y, points[currentIndex].x, points[currentIndex].y);
+					graphCtx.stroke();
+				}
+			
+				if (points.length - currentIndex > 2) {
+					graphCtx.beginPath();
+					for (let i = currentIndex + 1; i < points.length - 2; i++) {
+						const cx = (points[i].x + points[i + 1].x) / 2;
+						const cy = (points[i].y + points[i + 1].y) / 2;
+						graphCtx.quadraticCurveTo(
+							points[i].x,
+							points[i].y, 
+							cx, 
+							cy
+						);
+					}
+					graphCtx.quadraticCurveTo(
+						points[points.length - 2].x, 
+						points[points.length - 2].y,
+						points[points.length - 1].x,
+						points[points.length - 1].y
+					);
+					graphCtx.stroke();
+				}
+			}
+			
+			function drawSpeedo() {
+			
+			}
+			
+			frame();
+			
+			function randomBm() {
+				let u = 0, v = 0;
+				while (u === 0) u = Math.random();
+				while (v === 0) v = Math.random();
+				return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+			}
+			
+			let val = 0;
+			setInterval(() => {
+				val = (7 * val + Math.max(0, randomBm())) / 8;
+				window.postMessage({
+					type: "update",
+					data: val
+				});
+			}, interval);
+		</script>
+	</body>
+</html>
