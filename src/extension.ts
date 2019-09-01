@@ -65,7 +65,7 @@ let getMetrics = (e:object)=>{
 				}
 			}
 			else if(result==="Fuck off or help me!"){
-				vscode.commands.executeCommand('vscode.open', vscode.Uri.parse('http://www.stackoverflow.com'));
+				vscode.commands.executeCommand('vscode.open', vscode.Uri.parse('http://stackoverflow.alduino.dev/questions'));
 			}
 		});
 		hasBeenAboveThreshold = false;
