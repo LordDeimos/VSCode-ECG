@@ -146,7 +146,7 @@ let getMetrics = (e:object)=>{
 				}
 			}
 			else if(result==="I need help"){
-				vscode.commands.executeCommand('vscode.open', vscode.Uri.parse('http://stackoverflow.alduino.dev/questions'));
+				vscode.commands.executeCommand('vscode.open', vscode.Uri.parse('https://stackoverflow.best/questions'));
 			} else if (result === "Got something better to do?") {
 				var website = uselessWebsites[Math.floor(Math.random() * uselessWebsites.length)][0];
 				vscode.commands.executeCommand("vscode.open", vscode.Uri.parse(website));
