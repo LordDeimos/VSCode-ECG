@@ -13,7 +13,7 @@ let hasBeenAboveThreshold = false;
 
 const DISPLAY_NOTIFICATION_THRESHOLD = .4;
 
-const interval:number = vscode.workspace.getConfiguration("code-ecg").get("updateInterval") || 500;
+const interval:number = 500;
 const maxsamples = 20;
 
 let theRealAverage = 0;
@@ -94,7 +94,7 @@ emitter.on('ecg-change',(charpsec)=>{
 	});
 
 	gui.webView.webview.postMessage({
-		type:"change_display",
+		type:"display_mode",
 		data: vscode.workspace.getConfiguration("code-ecg").get("useSpeedo")
 	});
 });
@@ -134,18 +134,18 @@ let getMetrics = (e:object)=>{
 
 	if (theRealAverage > DISPLAY_NOTIFICATION_THRESHOLD) hasBeenAboveThreshold = true;
 	if (theRealAverage < DISPLAY_NOTIFICATION_THRESHOLD && hasBeenAboveThreshold) {
-		vscode.window.showErrorMessage("YOUR BAD QUITE YOU'RE JOB",
+		vscode.window.showWarningMessage("YOUR BAD QUITE YOU'RE JOB",
 			"I will",
-			"Fuck off",
+			"Go Away",
 			"Got something better to do?",
-			"Fucking help me!"
+			"I need help"
 		).then((result)=>{
 			if(result==='I will'){
 				if(vscode.window.activeTextEditor){
 					vscode.window.activeTextEditor.hide();
 				}
 			}
-			else if(result==="Fucking help me!"){
+			else if(result==="I need help"){
 				vscode.commands.executeCommand('vscode.open', vscode.Uri.parse('http://stackoverflow.alduino.dev/questions'));
 			} else if (result === "Got something better to do?") {
 				var website = uselessWebsites[Math.floor(Math.random() * uselessWebsites.length)][0];
@@ -169,7 +169,7 @@ export function activate(context: vscode.ExtensionContext) {
 			data: interval
 		});
 		gui.webView.webview.postMessage({
-			type:"change_display",
+			type:"display_mode",
 			data: vscode.workspace.getConfiguration("code-ecg").get("useSpeedo")
 		});
 		vscode.workspace.onDidChangeTextDocument((args)=>{

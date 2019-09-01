@@ -25,11 +25,6 @@
 			{
 				"title": "Code-ECG",
 				"properties": {
-					"code-ecg.updateInterval":{
-						"type":"integer",
-						"default":500,
-						"description": "Sets the update interval for the graph in milliseconds."
-					},
 					"code-ecg.useSpeedo":{
 						"type": "boolean",
 						"default": false,
