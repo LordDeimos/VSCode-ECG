@@ -3,7 +3,11 @@
 	"displayName": "code-ecg",
 	"description": "Code monitor like a ECG",
 	"version": "0.0.1",
-	"publisher": "team undecided",
+	"publisher": "undecided",
+	"repository": {
+		"url": "https://github.com/LordDeimos/VSCode-ECG",
+		"type": "git"
+	},
 	"engines": {
 		"vscode": "^1.32.0"
 	},
@@ -11,13 +15,13 @@
 		"Other"
 	],
 	"activationEvents": [
-		"onCommand:extension.openmonitor"
+		"onCommand:code-ecg.openmonitor"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
 		"commands": [
 			{
-				"command": "extension.openmonitor",
+				"command": "code-ecg.openmonitor",
 				"title": "Open ECG Monitor"
 			}
 		],

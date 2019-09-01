@@ -16,6 +16,8 @@ const DISPLAY_NOTIFICATION_THRESHOLD = .4;
 const interval:number = 500;
 const maxsamples = 20;
 
+let runner:number;
+
 let theRealAverage = 0;
 
 const uselessWebsites = [
@@ -86,7 +88,7 @@ const uselessWebsites = [
 	["http://www.amialright.com/"],
 	["http://nooooooooooooooo.com/"]
 ];
-
+5
 emitter.on('ecg-change',(charpsec)=>{
 	gui.webView.webview.postMessage({
 		type: "update",
@@ -142,7 +144,9 @@ let getMetrics = (e:object)=>{
 		).then((result)=>{
 			if(result==='I will'){
 				if(vscode.window.activeTextEditor){
-					vscode.window.activeTextEditor.hide();
+					vscode.commands.executeCommand("workbench.action.closeActiveEditor");
+					gui.webView.dispose();
+					deactivate();
 				}
 			}
 			else if(result==="I need help"){
@@ -161,7 +165,7 @@ let getMetrics = (e:object)=>{
 
 export function activate(context: vscode.ExtensionContext) {
 	console.log('Welcome to Code-ECG, get typing...');
-	let openmonitor = vscode.commands.registerCommand('extension.openmonitor', () => {
+	let openmonitor = vscode.commands.registerCommand('code-ecg.openmonitor', () => {
 
 		gui.setup(context);
 		gui.webView.webview.postMessage({
@@ -179,7 +183,7 @@ export function activate(context: vscode.ExtensionContext) {
 			previousContentChanges = newChanges;
 			++delta;
 		});
-		setInterval(getMetrics,interval);
+		runner = setInterval(getMetrics,interval);
 	});
 	context.subscriptions.push(openmonitor);
 }
@@ -187,4 +191,5 @@ export function activate(context: vscode.ExtensionContext) {
 // this method is called when your extension is deactivated
 export function deactivate() {
 	console.log("Window Closed");
+	clearInterval(runner);
 }
