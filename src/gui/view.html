@@ -37,6 +37,18 @@
 						break;
 					case "theme":
 						themeValues = data;
+					case "display_mode":
+						changeDisplayMode(data);
+				}
+			}
+
+			function changeDisplayMode(mode) {
+				if (mode) {
+					$graph.style.display = "none";
+					$speedo.style.display = "";
+				} else {
+					$graph.style.display = "";
+					$speedo.style.display = "none";
 				}
 			}
 			
