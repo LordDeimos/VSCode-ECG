@@ -122,7 +122,7 @@ function showYourBad() {
 			vscode.commands.executeCommand("vscode.open", vscode.Uri.parse(website));
 		}
 
-		if (result !== "Go Away") {
+		if (result !== "Go Away" && result !== "I will") {
 			setTimeout(() => {
 				showYourBad();
 			}, 1000);
