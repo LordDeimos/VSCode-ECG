@@ -11,10 +11,12 @@ let count = 0;
 let samples:Array<number> = [];
 let hasBeenAboveThreshold = false;
 
-const DISPLAY_NOTIFICATION_THRESHOLD = 0.004;
+const DISPLAY_NOTIFICATION_THRESHOLD = .4;
 
 const interval:number = vscode.workspace.getConfiguration("code-ecg").get("updateInterval") || 500;
-const maxsamples = Math.round(0.5*interval);
+const maxsamples = 20;
+
+let theRealAverage = 0;
 
 emitter.on('ecg-change',(charpsec)=>{
 	gui.webView.webview.postMessage({
@@ -34,7 +36,7 @@ let getMetrics = (e:object)=>{
 			if(message instanceof Array){
 				for(let problem of message){
 					if(vscode.DiagnosticSeverity[problem.severity]==="Error"){
-						temp -= problem.range.end.character-problem.range.start.character;
+						temp--;
 					}
 				}
 			}
@@ -44,10 +46,31 @@ let getMetrics = (e:object)=>{
 		samples.shift();
 	}
 	samples.push(delta);
-	let average = samples.reduce((prev,curr)=>{
-		return prev+curr;
-	})/samples.length;
-	let min = Math.max(average+temp,0.01);
+	// let average = samples.reduce((prev,curr)=>{
+	// 	return prev+curr;
+	// })/samples.length;
+
+	theRealAverage = (theRealAverage * maxsamples + delta) / (maxsamples + 1);
+
+	if (theRealAverage > DISPLAY_NOTIFICATION_THRESHOLD) hasBeenAboveThreshold = true;
+	if (theRealAverage < DISPLAY_NOTIFICATION_THRESHOLD && hasBeenAboveThreshold) {
+		vscode.window.showErrorMessage("YOUR BAD QUITE YOU'RE JOB",
+			"I will",
+			"Fuck off",
+			"Fuck off or help me!"
+		).then((result)=>{
+			if(result==='I will'){
+				if(vscode.window.activeTextEditor){
+					vscode.window.activeTextEditor.hide();
+				}
+			}
+			else if(result==="Fuck off or help me!"){
+				vscode.commands.executeCommand('vscode.open', vscode.Uri.parse('http://www.stackoverflow.com'));
+			}
+		});
+		hasBeenAboveThreshold = false;
+	}
+	let min = Math.max(theRealAverage+temp,0.01);
 	emitter.emit('ecg-change',(min)/(interval/1000));
 	delta = 0;
 }
