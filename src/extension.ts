@@ -124,6 +124,7 @@ let getMetrics = (e:object)=>{
 		}
 	}
 	temp *= (errorChars/currentDoc.getText().length);
+	if(!temp) temp= 0 ;
 	if(samples.length==maxsamples){
 		samples.shift();
 	}
