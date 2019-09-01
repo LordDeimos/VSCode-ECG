@@ -22,11 +22,11 @@
 				light: "#9cdcfe",
 				dark: "#5689d688",
 				background: "#1e1e1e",
-				foreground: "#d4d4d433"
+				foreground: "#d4d4d433",
+				red: "#ea4e2755"
 			};
 			
 			window.onmessage = function(message) {
-				console.log("Got update");
 				const {type, data} = message.data;
 				switch (type) {
 					case "update":
@@ -87,6 +87,7 @@
 			let updateTime = 0;
 			
 			function update(value) {
+				console.log("value: " + value);
 				values[currentIndex] = value;
 				currentIndex++;
 				updateTime = performance.now();
@@ -104,7 +105,6 @@
 			
 				scale = Math.max(...values, Number.isNaN(prediction) ? 0 : prediction) / $graph.height;
 				if (scale < .01) scale = .01;
-				console.log(scale);
 			
 				graphCtx.clearRect(0, 0, $graph.width, $graph.height);
 				speedoCtx.clearRect(0, 0, $speedo.width, $speedo.height);
@@ -117,6 +117,21 @@
 				graphCtx.lineWidth = 1;
 				graphCtx.strokeStyle = themeValues.foreground;
 				graphCtx.lineCap = "round";
+			
+				const points = values.map((line, i) => ({
+					x: (i - 1) * spacing,
+					y: $graph.height - line / scale
+				}));
+			
+				const lastRealValue = {index: currentIndex - 1, value: values[currentIndex - 1]};
+				const timeDiff = (performance.now() - updateTime) / interval;
+
+				for (let i = 0; i < values.length - 1; i++) {
+					if (values[i] > 1.4) continue;
+
+					graphCtx.fillStyle = themeValues.red;
+					graphCtx.fillRect(i * spacing, 0, spacing, $graph.height);
+				}
 
 				if (Math.floor(scale * 100) !== 0) {
 					for (let i = 0; i < $graph.height; i += Math.floor(scale * 100) / scale / 10) {
@@ -129,14 +144,6 @@
 
 				graphCtx.lineWidth = 3;
 				graphCtx.strokeStyle = themeValues.light;
-			
-				const points = values.map((line, i) => ({
-					x: (i - 1) * spacing,
-					y: $graph.height - line / scale
-				}));
-			
-				const lastRealValue = {index: currentIndex - 1, value: values[currentIndex - 1]};
-				const timeDiff = (performance.now() - updateTime) / interval;
 			
 				points[currentIndex] = {
 					x: (lastRealValue.index + timeDiff) * spacing,
