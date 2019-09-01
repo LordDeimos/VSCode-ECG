@@ -92,25 +92,36 @@ emitter.on('ecg-change',(charpsec)=>{
 		type: "update",
 		data: charpsec
 	});
+
+	gui.webView.webview.postMessage({
+		type:"change_display",
+		data: vscode.workspace.getConfiguration("code-ecg").get("useSpeedo")
+	});
 });
 
 let getMetrics = (e:object)=>{
 	let editor = vscode.window.activeTextEditor;
-	if(!editor) return;
+	if(!editor){
+		emitter.emit('ecg-change',0.1);
+		return;
+	}
 	let currentDoc = editor.document;
 	let diags = vscode.languages.getDiagnostics();
 	let temp = 0;
+	let errorChars = 0;
 	for(let diag of diags){
 		for(let message of diag){
 			if(message instanceof Array){
 				for(let problem of message){
 					if(vscode.DiagnosticSeverity[problem.severity]==="Error"){
 						temp--;
+						errorChars += problem.range.end.character-problem.range.start.character;
 					}
 				}
 			}
 		}
 	}
+	temp *= (errorChars/currentDoc.getText().length);
 	if(samples.length==maxsamples){
 		samples.shift();
 	}
@@ -157,6 +168,10 @@ export function activate(context: vscode.ExtensionContext) {
 			type: "interval",
 			data: interval
 		});
+		gui.webView.webview.postMessage({
+			type:"change_display",
+			data: vscode.workspace.getConfiguration("code-ecg").get("useSpeedo")
+		});
 		vscode.workspace.onDidChangeTextDocument((args)=>{
 			++delta;
 		});
@@ -166,4 +181,6 @@ export function activate(context: vscode.ExtensionContext) {
 }
 
 // this method is called when your extension is deactivated
-export function deactivate() {}
+export function deactivate() {
+	console.log("Window Closed");
+}
