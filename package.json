@@ -29,6 +29,11 @@
 						"type":"integer",
 						"default":500,
 						"description": "Sets the update interval for the graph in milliseconds."
+					},
+					"code-ecg.useSpeedo":{
+						"type": "boolean",
+						"default": false,
+						"description": "Set whether to use the graph or the speedo"
 					}
 				}
 			}
