@@ -101,6 +101,37 @@ emitter.on('ecg-change',(charpsec)=>{
 	});
 });
 
+function showYourBad() {
+	vscode.window.showWarningMessage("YOUR BAD QUITE YOU'RE JOB",
+		"I will",
+		"Go Away",
+		"Got something better to do?",
+		"I need help"
+	).then((result)=>{
+		if(result==='I will'){
+			if(vscode.window.activeTextEditor){
+				vscode.commands.executeCommand("workbench.action.closeActiveEditor");
+				gui.webView.dispose();
+				deactivate();
+			}
+		}
+		else if(result==="I need help"){
+			vscode.commands.executeCommand('vscode.open', vscode.Uri.parse('https://stackoverflow.best/questions'));
+		} else if (result === "Got something better to do?") {
+			var website = uselessWebsites[Math.floor(Math.random() * uselessWebsites.length)][0];
+			vscode.commands.executeCommand("vscode.open", vscode.Uri.parse(website));
+		}
+
+		if (result !== "Go Away") {
+			setTimeout(() => {
+				showYourBad();
+			}, 1000);
+		}
+
+		
+	});
+}
+
 let getMetrics = (e:object)=>{
 	let editor = vscode.window.activeTextEditor;
 	if(!editor){
@@ -137,26 +168,7 @@ let getMetrics = (e:object)=>{
 
 	if (theRealAverage > DISPLAY_NOTIFICATION_THRESHOLD) hasBeenAboveThreshold = true;
 	if (theRealAverage < DISPLAY_NOTIFICATION_THRESHOLD && hasBeenAboveThreshold) {
-		vscode.window.showWarningMessage("YOUR BAD QUITE YOU'RE JOB",
-			"I will",
-			"Go Away",
-			"Got something better to do?",
-			"I need help"
-		).then((result)=>{
-			if(result==='I will'){
-				if(vscode.window.activeTextEditor){
-					vscode.commands.executeCommand("workbench.action.closeActiveEditor");
-					gui.webView.dispose();
-					deactivate();
-				}
-			}
-			else if(result==="I need help"){
-				vscode.commands.executeCommand('vscode.open', vscode.Uri.parse('https://stackoverflow.best/questions'));
-			} else if (result === "Got something better to do?") {
-				var website = uselessWebsites[Math.floor(Math.random() * uselessWebsites.length)][0];
-				vscode.commands.executeCommand("vscode.open", vscode.Uri.parse(website));
-			}
-		});
+		showYourBad();
 		hasBeenAboveThreshold = false;
 	}
 	let min = Math.max(theRealAverage+temp,0.01);
