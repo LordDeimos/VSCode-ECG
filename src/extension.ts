@@ -172,7 +172,11 @@ export function activate(context: vscode.ExtensionContext) {
 			type:"display_mode",
 			data: vscode.workspace.getConfiguration("code-ecg").get("useSpeedo")
 		});
+		let previousContentChanges: string = "";
 		vscode.workspace.onDidChangeTextDocument((args)=>{
+			const newChanges = (args.contentChanges[0] || {text:""}).text;
+			if (newChanges === previousContentChanges) return;
+			previousContentChanges = newChanges;
 			++delta;
 		});
 		setInterval(getMetrics,interval);
